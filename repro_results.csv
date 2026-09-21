@@ -1,0 +1,7 @@
+run,way,files_in_commit,n_files,still_staged
+1,git add a.txt; git commit,a.txt;b.txt,2,
+1,git commit --only -- a.txt,a.txt,1,b.txt
+2,git add a.txt; git commit,a.txt;b.txt,2,
+2,git commit --only -- a.txt,a.txt,1,b.txt
+3,git add a.txt; git commit,a.txt;b.txt,2,
+3,git commit --only -- a.txt,a.txt,1,b.txt
