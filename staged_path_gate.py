@@ -9,6 +9,9 @@ pre-commit から呼ぶなら:  python staged_path_gate.py --check <自分の予
 """
 import subprocess, sys
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")  # Windows の既定（cp932）では 🔴／✅ の表示で落ちて exit 1 になっていた（2026-09-26）
+
 
 def git(*args):
     p = subprocess.run(["git", *args], capture_output=True)
@@ -19,7 +22,10 @@ def git(*args):
 
 
 def norm(p):
-    return p.replace("\\", "/").lstrip("./")
+    p = p.replace("\\", "/")
+    while p.startswith("./"):  # 先頭の「./」だけを外す。lstrip("./") は「.」と「/」をすべて剥がし、.env を env、.config/ を config/ と同じに扱っていた（2026-09-26 外部精査）
+        p = p[2:]
+    return p
 
 
 args = sys.argv[1:]

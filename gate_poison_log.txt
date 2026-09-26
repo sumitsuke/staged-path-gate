@@ -5,3 +5,9 @@
 [--check docs/mine.md --dir docs/] exit=0 : ✅ stage 2 本はすべて予定内（['docs/mine.md', 'docs/']）
 [--check docs/mine.md] exit=1 : 🔴 予定外のパスが stage に 1 本（予定 1 ファイル・0 ディレクトリ）
 [リポの外] exit=2 : 🔴 git failed: rev-parse --show-toplevel: fatal: not a git repository (or any of the parent directories): .git
+
+# 2026-09-26 外部精査の追加（先頭の「.」が剥がれていた）。直す前（UTF-8 で表示）: .env/env→exit 0・.config/secret/--dir config/→exit 0（どちらも誤って通過）・.env/a.md→1・.env/.env→0。直す前は Windows 既定の cp932 では 🔴／✅ の表示で落ちて 4 例とも exit 1。直した後（表示の文字コード指定なし）:
+[stage .env / --check env] exit=1 : 🔴 予定外のパスが stage に 1 本（予定 1 ファイル・0 ディレクトリ）
+[stage .config/secret / --check --dir config/] exit=1 : 🔴 予定外のパスが stage に 1 本（予定 0 ファイル・1 ディレクトリ）
+[stage .env / --check a.md] exit=1 : 🔴 予定外のパスが stage に 1 本（予定 1 ファイル・0 ディレクトリ）
+[stage .env / --check .env] exit=0 : ✅ stage 1 本はすべて予定内（['.env']）

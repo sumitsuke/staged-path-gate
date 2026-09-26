@@ -29,7 +29,20 @@ python staged_path_gate.py --check docs/a.md --dir generated/   # --dir allows a
 Exit 0 = everything staged is in your plan · 1 = unexpected staged paths (listed) · 2 = git failed (outside a repo, etc. — fail-closed).
 No state file: you pass the plan on every call, so two sessions sharing one working copy cannot overwrite each other's plan. Call it from `pre-commit` with your own paths.
 
-Poison tests (`gate_poison_log.txt`): planned file → 0 · other directory → 1 · **sibling in the same directory → 1** · `--dir` explicit → 0 · `.bak` next to the planned file → 1 · outside a repo → 2.
+Poison tests (`gate_poison_log.txt`): planned file → 0 · other directory → 1 · **sibling in the same directory → 1** · `--dir` explicit → 0 · `.bak` next to the planned file → 1 · outside a repo → 2. Added 2026-09-26: `.env` vs planned `env` → 1 · `.config/secret` vs `--dir config/` → 1.
+
+## Correction (2026-09-26)
+
+An external review found that `norm()` used `lstrip("./")`, which strips **every** leading `.` and `/` — not just a `./` prefix. So `.env` was compared as `env`, and `.config/secret` as `config/secret`:
+
+| staged | plan | before | after |
+|---|---|---|---|
+| `.env` | `env` | 0 (passed — wrong) | 1 |
+| `.config/secret` | `--dir config/` | 0 (passed — wrong) | 1 |
+| `.env` | `a.md` | 1 | 1 |
+| `.env` | `.env` | 0 | 0 |
+
+A dotfile slipped through only when a same-named non-dot path was in the plan. Also, on a Windows console with the default code page (cp932), printing 🔴／✅ raised `UnicodeEncodeError`, so the gate exited 1 even when everything was planned (fail-closed, but unusable). Fixed: strip only leading `./`, and force UTF-8 stdout. The runs are appended to `gate_poison_log.txt`.
 
 ## What it does not do
 
